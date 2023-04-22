@@ -1,6 +1,7 @@
 .api
 *.aux
 *.log
+*.out
 *.pdf
 *.session
 news

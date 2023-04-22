@@ -1,13 +1,13 @@
-all: clean deps run
+all: clean deps fetch
 
-run:
-	python3 fetch.py
+clean:
+	rm -rf news latex/*.aux latex/*.log
 
 deps:
 	pip3 install -r requirements.txt
 
-clean:
-	rm -r news
+fetch:
+	python3 fetch.py
 
 latex:
 	cd latex

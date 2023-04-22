@@ -3,16 +3,14 @@ from datetime import datetime, timedelta
 from telethon import TelegramClient, events, sync
 
 # number of messages to get
-FETCHCOUNT = 10
+FETCHCOUNT = 100
 # time period (def. week)
 PERIOD = 7
 
 # friendly debug reminder
 errorcount = 0
 
-# channels = ['bloknot_vrn', 'neuralmeduza', 'sosicka', 'shot_shot']
-channels = ['sosicka']
-
+channels = ['bloknot_vrn', 'neuralmeduza', 'sosicka', 'shot_shot']
 
 def login(api_creds):
     api_id = int(api_creds[0])
@@ -71,6 +69,10 @@ def save(post):
     # save text
     if post.text:
         open(os.path.join(postdir, 'msg'), 'w').write(post.text)
+
+    if post.chat.title:
+        open(os.path.join(postdir, 'channel'), 'w').write(post.chat.title + '\nhttps://t.me/' \
+                                                          + post.chat.username)
 
     return 0
 
