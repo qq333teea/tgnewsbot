@@ -1,2 +1,7 @@
 tgnewspaper
 ===========
+
+make commands:
+     run    - run pyscript
+     deps   - pip requirements
+     latex  - compile .tex
