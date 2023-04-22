@@ -10,8 +10,8 @@ PERIOD = 7
 # friendly debug reminder
 errorcount = 0
 
-channels = ['bloknot_vrn', 'neuralmeduza', 'sosicka', 'shot_shot']
-# channels = ['neuralmeduza']
+# channels = ['bloknot_vrn', 'neuralmeduza', 'sosicka', 'shot_shot']
+channels = ['sosicka']
 
 
 def login(api_creds):
@@ -47,7 +47,8 @@ def rateposts(messages):
             for reaction in message.reactions.results:
                 total += reaction.count
 
-            ratings.append([message, total])
+            if not message.video or message.poll:
+                ratings.append([message, total])
         except:
             print('Something went wrong! Well anyway...')
             errorcount += 1
@@ -57,26 +58,22 @@ def rateposts(messages):
     return [post[0] for post in bestposts]
 
 
-def thumb_gen():
-    return 0
-
-
 def save(post):
-    path = os.getcwd().join('news').join(str(post.id))
+    postdir = os.path.join(os.getcwd(), 'news', str(post.id))
 
-    if not os.path.exists(path):
-        os.makedirs(path)
+    if not os.path.exists(postdir):
+        os.makedirs(postdir)
+
     # if media save media
-    if post.media:
-        post.download_media()
-        if post.video:
-            thumb_gen()
+    if post.photo:
+        post.download_media(file=postdir)
 
     # save text
     if post.text:
-        open(path.join('msg.txt'), 'w').write(post.text)
+        open(os.path.join(postdir, 'msg'), 'w').write(post.text)
 
     return 0
+
 
 def main():
     client = login(open(".api", "r").readlines())
