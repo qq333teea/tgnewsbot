@@ -1,7 +1,15 @@
 tgnewspaper
 ===========
 
+usage:
+    make
+
+just ignore all the latex erorrs it compiles anyway
+
+produces output to latex/news.pdf
+
 make commands:
-     run    - run pyscript
-     deps   - pip requirements
-     latex  - compile .tex
+     clean  - ...
+     deps   - install from requirements.txt
+     fetch  - generate tex source
+     latex  - compile tex source
