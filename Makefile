@@ -1,7 +1,9 @@
-all: clean deps fetch
+.PHONY: all clean deps fetch latex
+
+all: clean deps fetch latex
 
 clean:
-	rm -rf news latex/*.aux latex/*.log
+	rm -f latex/*.aux latex/*.log latex/fig/*
 
 deps:
 	pip3 install -r requirements.txt
@@ -10,5 +12,4 @@ fetch:
 	python3 fetch.py
 
 latex:
-	cd latex
-	pdflatex news.tex
+	sh -c 'cd latex; xelatex news.tex'
