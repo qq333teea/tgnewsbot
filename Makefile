@@ -12,4 +12,4 @@ fetch:
 	python3 fetch.py
 
 latex:
-	sh -c 'cd latex; xelatex news.tex'
+	cd latex; xelatex news.tex

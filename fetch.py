@@ -3,14 +3,16 @@ from datetime import datetime, timedelta
 from telethon import TelegramClient, events, sync
 
 # number of messages to get
-FETCHCOUNT = 100
+FETCHCOUNT = 140
+# posts from each channel
+POSTCOUNT = 3
 # time period (def. week)
 PERIOD = 7
 
 # friendly debug reminder
 errorcount = 0
 
-channels = ['bloknot_vrn', 'neuralmeduza', 'sosicka', 'shot_shot', 'tonnakreativa']
+channels = ['bloknot_vrn', 'neuralmeduza', 'sosicka', 'shot_shot', 'tonnakreativa', 'olegizvini']
 horo = 'neural_horo'
 
 def login(api_creds):
@@ -52,7 +54,7 @@ def rateposts(messages):
             print('Something went wrong! Well anyway...')
             errorcount += 1
 
-    bestposts = sorted(ratings, key=lambda x: x[1], reverse=True)[:3]
+    bestposts = sorted(ratings, key=lambda x: x[1], reverse=True)[:POSTCOUNT]
 
     return [post[0] for post in bestposts]
 
@@ -124,6 +126,7 @@ def textempl(tex):
 \\usepackage{lipsum}
 \\usepackage{fontspec}
 \\setmainfont{Symbola}
+\\nonstopmode
 \\begin{document}
 \\maketitle
 \\begin{multicols}{3}
@@ -140,7 +143,7 @@ def main():
     # open telegram session
     client = login(open(".api", "r").readlines())
     client.start()
-    
+
     # create channel list including only messages from last week
     for channel in channels:
         messages = client.get_messages(channel, FETCHCOUNT)
