@@ -14,6 +14,17 @@ lmao idk
 
 ## Usage
 
+put api id and hash into `.api` file
+
+example:
+
+```
+31625
+b41b32n4324b1j413b
+```
+
+[how to get api credentials](https://docs.telethon.dev/en/stable/basic/signing-in.html)
+
 produces output to latex/news.pdf
 
     $ git clone https://github.com/qq333teea/tgnewspaper
