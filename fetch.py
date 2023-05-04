@@ -1,19 +1,55 @@
 import os
+import sys
 from datetime import datetime, timedelta
 from telethon import TelegramClient, events, sync
 
+
+def checkenv(env, val):
+    if os.getenv(env):
+        return os.getenv(env)
+    return val
+
 # number of messages to get
-FETCHCOUNT = 140
+FETCHNUM = int(checkenv("F", 300))
+
 # posts from each channel
-POSTCOUNT = 3
-# time period (def. week)
-PERIOD = 7
+POSTNUM = int(checkenv("P", 3))
+
+# time period in days
+DAYS = int(checkenv("D", 7))
+
+# channel list
+if os.getenv("C"):
+    channels = os.getenv("C").split()
+else:
+    channels = [
+        'bloknot_vrn', 'neuralmeduza', 'sosicka',
+        'shot_shot', 'svtvnews', 'tonnakreativa',
+        'olegizvini', 'pezduzalive', 'memeblogteam',
+        'neural_recipes'
+    ]
+
+# ...
+if os.getenv("H") == "0":
+    horop = False
+else:
+    horop = True
+
+# post author
+if os.getenv("A") == "0":
+    signp = False
+else:
+    signp = True
+
+VOL = checkenv("VOL", "1")
+ISSUE = checkenv("ISSUE", "666")
+NAME = checkenv("NAME", "Acid'n'Shit")
+LOCATION = checkenv("LOCATION", "Hlevnoe DC")
+SLOGAN = checkenv("SLOGAN", "``Что может быть хуже...''")
+PRICE = checkenv("PRICE", "Zero Rubles")
 
 # friendly debug reminder
 errorcount = 0
-
-channels = ['bloknot_vrn', 'neuralmeduza', 'sosicka', 'shot_shot', 'tonnakreativa', 'olegizvini']
-horo = 'neural_horo'
 
 def login(api_creds):
     api_id = int(api_creds[0])
@@ -24,7 +60,7 @@ def login(api_creds):
 
 def get_week(channel):
     news = []
-    lastweek = datetime.today() - timedelta(days=PERIOD)
+    lastweek = datetime.today() - timedelta(days=DAYS)
 
     for message in channel:
         # cringe
@@ -54,7 +90,7 @@ def rateposts(messages):
             print('Something went wrong! Well anyway...')
             errorcount += 1
 
-    bestposts = sorted(ratings, key=lambda x: x[1], reverse=True)[:POSTCOUNT]
+    bestposts = sorted(ratings, key=lambda x: x[1], reverse=True)[:POSTNUM]
 
     return [post[0] for post in bestposts]
 
@@ -70,7 +106,10 @@ def gendate(date):
     return '\n\n' + date.strftime("%d.%m.%Y %H:%M")
 
 def gentitle(title, channel):
-    return '\\byline{' + title + '}{' + channel + '}\n\n'
+    if signp:
+        return '\\byline{' + title + '}{' + channel + '}\n\n'
+    else:
+        return '\\headline{' + title + '}\n\n'
 
 
 def photopost(photo, date, text):
@@ -101,7 +140,7 @@ def gentex(post, fig):
 
     latex += '\\closearticle\n'
 
-    return latex
+    return latex.replace("%", "\\%")
 
 
 def textempl(tex):
@@ -113,13 +152,13 @@ def textempl(tex):
 \\usepackage{microtype}
 \\usepackage{newspaper}
 \\date{\\today}
-\\currentvolume{1}
-\\currentissue{666}
-\\SetPaperName{Acid'n'Shit}
-\\SetHeaderName{Acid'n'Shit}
-\\SetPaperLocation{Hlevnoe DC}
-\\SetPaperSlogan{``Что может быть хуже...''}
-\\SetPaperPrice{Zero Rubles}
+\\currentvolume{''' + VOL + '''}
+\\currentissue{''' + ISSUE + '''}
+\\SetPaperName{''' + NAME +  '''}
+\\SetHeaderName{''' + NAME +  '''}
+\\SetPaperLocation{''' + LOCATION +  '''}
+\\SetPaperSlogan{''' + SLOGAN +  '''}
+\\SetPaperPrice{''' + PRICE +  '''}
 \\usepackage{graphicx}
 \\usepackage{multicol}
 \\usepackage{picinpar}
@@ -135,18 +174,19 @@ def textempl(tex):
 \\end{document}
 '''
 
-def main():
-    posts = []
+def newspaper(client):
     lpath = os.path.join(os.getcwd(), 'latex')
+    picdir = os.path.join(lpath, 'fig')
+    posts = []
     latex = ''
 
-    # open telegram session
-    client = login(open(".api", "r").readlines())
-    client.start()
-
+    # pic dir
+    if not os.path.exists(picdir):
+        os.mkdir(picdir)
+    
     # create channel list including only messages from last week
     for channel in channels:
-        messages = client.get_messages(channel, FETCHCOUNT)
+        messages = client.get_messages(channel, FETCHNUM)
         lastweekmsgs = get_week(messages)
         posts += rateposts(lastweekmsgs)
 
@@ -154,7 +194,8 @@ def main():
     posts = picfirst(posts)
 
     # append ai horoscope
-    posts.append(client.get_messages(horo, 1)[0])
+    if horop:
+        posts.append(client.get_messages('neural_horo', 1)[0])
 
     # generate latex source
     for post in posts:
@@ -162,11 +203,20 @@ def main():
 
     # write tex source
     open(os.path.join(lpath, 'news.tex'), 'w').write(textempl(latex))
-
-    print(posts)
-    
     print('Wow, only ', errorcount, 'errors today! FIX YOUR SHIT')
 
+# TODO
+def postrating(client):
+    return 0
+
+def main():
+
+    # open telegram session
+    client = login(open(".api", "r").readlines())
+    client.start()
+
+    sys.exit(newspaper(client))
+    # postrating(client)
 
 if __name__ == '__main__':
     main()
